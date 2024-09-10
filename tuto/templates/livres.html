@@ -1,0 +1,8 @@
+{% extends "base.html" %}
+{% block main %}
+<div class="sample">
+    {% for book in books %}
+    <img src="{{ url_for('static', filename='images/'+book.img)}}" alt="{{book.title}}" title="{{book.title}}">
+    {% endfor %}
+</div>
+{% endblock %}
