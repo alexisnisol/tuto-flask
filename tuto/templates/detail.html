@@ -6,7 +6,6 @@
 {% endblock %}
 
 {% block content %}
-<h1>{{title}}</h1>
 <div class="sample">
     {% for book in books %}
     <a href="{{ url_for('detail', id=book.id)}}">

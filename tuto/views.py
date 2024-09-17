@@ -20,3 +20,9 @@ def show_livres():
         "livres.html",
         title="Livres d'Amazon !",
         books=get_books())
+
+@app.route("/detail/<id>")
+def detail(id):
+    books = get_books()
+    book = books[int(id)]
+    return render_template("detail.html", book=book)
