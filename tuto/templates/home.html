@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
 {% block styles %}
-{{ super()}}
+{{ super() }}
 <link rel="stylesheet" href="{{ url_for('static', filename='home.css') }}">
 {% endblock %}
 
@@ -10,7 +10,7 @@
 <div class="sample">
     {% for book in books %}
     <a href="{{ url_for('detail', id=book.id)}}">
-        <img src="{{ url_for('static', filename='images/'+book.img)}}" alt="{{book.title}}" title="{{book.title}}">
+        <img src="{{ url_for('static', filename='images/'+book.image)}}" alt="{{book.title}}" title="{{book.title}}">
     </a>
     {% endfor %}
 </div>

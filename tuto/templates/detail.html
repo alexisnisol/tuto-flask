@@ -1,17 +1,22 @@
-{% extends "base.html" %}
-
+{% extends 'base.html' %}
 {% block styles %}
-{{ super()}}
-<link rel="stylesheet" href="{{ url_for('static', filename='home.css') }}">
+{{ super() }}
+<link rel="stylesheet" href="{{ url_for('static', filename='home.css')}}"> 
 {% endblock %}
-
 {% block content %}
-<div class="sample">
-    {% for book in books %}
-    <a href="{{ url_for('detail', id=book.id)}}">
-        <img src="{{ url_for('static', filename='images/'+book.img)}}" alt="{{book.title}}" title="{{book.title}}">
+<div class="card border-light mb-3 mycard">
+    <div class="card-header">{{ book.title }}</div>
+    <a href="{{ book.url }}" target='_blank'>
+            <img src="{{ url_for('static', filename='images/'+book.image) }}" alt="Couverture de {{ book.title }}"
+                    title="{{ book.title }}" class="card-img-top" />
     </a>
-    {% endfor %}
+    <div class="card-body">
+            <h5 class="card-text card-footer">
+                    Auteur : {{ book.author }}
+            </h5>
+            <h6 class="card-text card-footer">
+                Prix : {{ book.price }} â¬
+        </h6>
+    </div>
 </div>
-
 {% endblock %}

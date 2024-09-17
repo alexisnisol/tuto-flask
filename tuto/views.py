@@ -1,6 +1,6 @@
 from .app import app
 from flask import render_template
-from .models import get_books
+from .models import get_sample
 
 
 @app.route("/")
@@ -12,17 +12,10 @@ def show_names():
     return render_template(
         "home.html",
         title="Hello World!",
-        names=["Pierre", "Paul", "Corinne"])
-
-@app.route("/livres")
-def show_livres():
-    return render_template(
-        "livres.html",
-        title="Livres d'Amazon !",
-        books=get_books())
+        books=get_sample())
 
 @app.route("/detail/<id>")
 def detail(id):
-    books = get_books()
+    books = get_sample()
     book = books[int(id)]
     return render_template("detail.html", book=book)
