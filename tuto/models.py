@@ -19,6 +19,8 @@ from .app import db
 class Author(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100))
+    def __repr__(self):
+        return "<Author (%d) %s>" % (self.id, self.name)
 
 class Book(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -30,7 +32,7 @@ class Book(db.Model):
     author = db.relationship('Author', backref=db.backref('books', lazy='dynamic')) #dynamic => suppression en cascade etc.
 
     def __repr__(self):
-        return "<Book: %s>" % self.title
+        return "<Book (%d) %s>" % (self.id, self.title)
 
 def get_sample():
     return Book.query.limit(10).all()
