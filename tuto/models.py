@@ -15,6 +15,7 @@
 
 
 from .app import db
+from flask_login import UserMixin
 
 class Author(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -39,3 +40,10 @@ def get_sample():
 
 def get_author(id):
     return Author.query.get(id)
+
+class User(db.Model, UserMixin):
+    username = db.Column(db.String(50), primary_key=True)
+    password = db.Column(db.String(64))
+
+    def get_id(self):
+        return self.username
