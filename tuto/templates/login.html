@@ -5,6 +5,7 @@
 {% endblock %}
 
 {% block content %}
+<h1>Authentification</h1>
 <form class="form-horizontal" method="POST" action="{{ url_for('login') }}">
     {{ form.hidden_tag() }}
     <div class="form-group">

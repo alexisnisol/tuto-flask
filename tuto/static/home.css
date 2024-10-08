@@ -6,6 +6,7 @@ div.sample{
     text-align: center;
     margin-left: 25%;
     margin-right: 25%;
+    margin-bottom: 5%;
 }
 
 main{
@@ -19,7 +20,7 @@ footer{
 }
 
 main > .container {
-    padding: 60px 15px 0;
+    padding: 20px 15px 0;
 }
 
 
@@ -28,3 +29,6 @@ div.mycard{
     width: 18rem; 
 }
 
+.add_author {
+    margin-bottom: 2em;
+}
