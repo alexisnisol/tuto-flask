@@ -18,3 +18,4 @@ app.config['SQLALCHEMY_DATABASE_URI'] = ('sqlite:///' + mkpath('../myapp.db'))
 db = SQLAlchemy(app)
 
 login_manager = LoginManager(app)
+login_manager.login_view = 'login'
