@@ -6,6 +6,7 @@ def mkpath(p):
 from flask_sqlalchemy import SQLAlchemy
 from flask import Flask
 from flask_bootstrap import Bootstrap5
+from flask_login import LoginManager
 
 app = Flask(__name__)
 app.config['BOOSTRAP_SERVE_LOCAL'] = True
@@ -15,3 +16,5 @@ app.config['SECRET_KEY'] = 'b19d7fe4-604e-46fb-a701-6c6f51e9676d'   ## Utilisé 
                                                                     ##on s'assure que la requête provient bien de notre site
 app.config['SQLALCHEMY_DATABASE_URI'] = ('sqlite:///' + mkpath('../myapp.db'))
 db = SQLAlchemy(app)
+
+login_manager = LoginManager(app)

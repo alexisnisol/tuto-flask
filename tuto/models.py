@@ -14,7 +14,7 @@
  #   return Books
 
 
-from .app import db
+from .app import db, login_manager
 from flask_login import UserMixin
 
 class Author(db.Model):
@@ -47,3 +47,7 @@ class User(db.Model, UserMixin):
 
     def get_id(self):
         return self.username
+    
+@login_manager.user_loader
+def load_user(username):
+    return User.query.get(username)
