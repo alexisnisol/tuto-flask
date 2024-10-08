@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% block styles %}
+{{ super() }}
+<link rel="stylesheet" href="{{ url_for('static', filename='home.css') }}">
+{% endblock %}
+
+
+{% block content %}
+<h1>Add author:</h1>
+<form method="POST" action="{{ url_for('save_author') }}">
+    {{ form.hidden_tag() }}
+    <div class=
+        {% if form.name.errors %}
+            "form-group has-error"
+        {% else %}
+            "form-group"
+        {% endif %}
+        >
+        {{ form.name.label }} {{ form.name(size=50, class_="form-control") }}
+    </div>
+    {% if form.name.errors %}
+        <ul class="list-group">
+            {% for e in form.name.errors %}
+                <li class="list-group-item list-group-item-danger">{{ e }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+    <input class="btn btn-primary" type="submit" value="Créer">
+</form>
+{% endblock %}
