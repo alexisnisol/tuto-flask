@@ -29,6 +29,14 @@ div.mycard{
     width: 18rem; 
 }
 
-.add_author {
+
+div.sample img:hover{
+    transform: scale(1.1);
+    transition: transform 0.5s;
+}
+
+
+
+.add_button {
     margin-bottom: 2em;
 }

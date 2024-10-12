@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+
+{% block styles %}
+{{ super() }}
+<link rel="stylesheet" href="{{ url_for('static', filename='home.css') }}">
+{% endblock %}
+
+
+{% block content %}
+<h1>Add book:</h1>
+<form method="POST" action="{{ url_for('save_book') }}" enctype="multipart/form-data">
+    {{ form.hidden_tag() }}
+    <div class="form-group">
+        {{ form.title.label }} {{ form.title(size=50, class_="form-control") }}
+    </div>
+    {% if form.title.errors %}
+        <ul class="list-group">
+            {% for e in form.title.errors %}
+                <li class="list-group-item list-group-item-danger">{{ e }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+
+    <div class="form-group">
+        {{ form.price.label }} {{ form.price(size=50, class_="form-control") }}
+    </div>
+    {% if form.price.errors %}
+        <ul class="list-group">
+            {% for e in form.price.errors %}
+                <li class="list-group-item list-group-item-danger">{{ e }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+
+    <div class="form-group">
+        {{ form.author.label }} {{ form.author(class_="form-control") }}
+    </div>
+    {% if form.author.errors %}
+        <ul class="list-group">
+            {% for e in form.author.errors %}
+                <li class="list-group-item list-group-item-danger">{{ e }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+
+    <div class="form-group">
+        {{ form.url.label }} {{ form.url(size=50, class_="form-control") }}
+    </div>
+    {% if form.url.errors %}
+        <ul class="list-group">
+            {% for e in form.url.errors %}
+                <li class="list-group-item list-group-item-danger">{{ e }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+
+    <div class="form-group">
+        {{ form.image.label }} {{ form.image(class_="form-control") }}
+    </div>
+    {% if form.image.errors %}
+        <ul class="list-group">
+            {% for e in form.image.errors %}
+                <li class="list-group-item list-group-item-danger">{{ e }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+
+    <input class="btn btn-primary" type="submit" value="Créer">
+</form>
+{% endblock %}
