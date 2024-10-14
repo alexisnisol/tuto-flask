@@ -3,17 +3,28 @@ from flask import render_template, url_for, redirect, request
 from .models import get_author, get_sample, Book, Author, User
 from flask_wtf import FlaskForm
 from wtforms import StringField, HiddenField, PasswordField, SelectField, DecimalField
-from flask_wtf.file import FileField, FileAllowed, FileRequired, FileSize
+from flask_wtf.file import FileField, FileAllowed, FileRequired
 from wtforms.validators import DataRequired
 from hashlib import sha256
 from flask_login import login_user, current_user, logout_user, login_required
 
 class AuthorForm(FlaskForm):
+    """Formulaire pour la gestion des auteurs
+    """
     id = HiddenField('id')
     name = StringField('Nom', validators=[DataRequired()])
 
 class BookForm(FlaskForm):
+    """Formulaire pour la gestion des livres
 
+    Attributes:
+        id (HiddenField): Identifiant du livre
+        title (StringField): Titre du livre
+        price (DecimalField): Prix du livre
+        author (SelectField): Auteur du livre (liste déroulante des auteurs de la base de données)
+        url (StringField): URL du livre (lien vers la page amazon, fnac, ...)
+        image (FileField): Image de couverture du livre
+    """
     id = HiddenField('id')
     title = StringField('Titre', validators=[DataRequired()])
     price = DecimalField('Prix', validators=[DataRequired()])
@@ -28,11 +39,23 @@ class BookForm(FlaskForm):
         self.author.choices = [(a.id, a.name) for a in authors]
 
 class LoginForm(FlaskForm):
+    """Formulaire de connexion
+    
+    Attributes:
+        username (StringField): Nom d'utilisateur
+        password (PasswordField): Mot de passe
+        next (HiddenField): Page de redirection après connexion
+    """
     username = StringField('Username')
     password = PasswordField('Password')
     next = HiddenField('next')
 
     def get_authenticated_user(self):
+        """Vérifie si l'utilisateur existe et si le mot de passe est correct
+
+        Returns:
+            User: Utilisateur connecté si les informations sont correctes, None sinon
+        """
         user = User.query.get(self.username.data)
         if user is None:
             return None
@@ -43,6 +66,8 @@ class LoginForm(FlaskForm):
 
 @app.route("/")
 def home():
+    """Route vers la page d'accueil.
+    """
     return render_template(
         "home.html",
         title="Page d'accueil",
@@ -50,11 +75,15 @@ def home():
 
 @app.route("/books")
 def books():
-        return render_template("home.html", title="", books=get_sample())
+    """Route vers la liste des livres.
+    """
+    return render_template("home.html", title="", books=get_sample())
 
 @app.route("/add/book")
 @login_required
 def add_book():
+    """Route vers l'ajout d'un nouveau livre.
+    """
     f = BookForm()
     f.set_choices(Author.query.all())
     return render_template("books/add_book.html", form=f)
@@ -62,17 +91,13 @@ def add_book():
 @app.route("/save/book", methods=["POST"])
 @login_required
 def save_book():
+    """Route vers la sauvegarde d'un livre.
+    Si le formulaire est valide, le livre est ajouté à la base de données.
+    """
     b = None
     f = BookForm()
     f.set_choices(Author.query.all())
     if f.validate_on_submit():
-        #if f.id.data:
-        #    id = int(f.id.data)
-        #    a = get_author(id)
-        #    a.name = f.name.data
-        #    db.session.commit()
-        #    return redirect(url_for("edit_author", id=id))
-        #else:
         a = Author.query.get(f.author.data)
         b = Book(
             price=f.price.data,
@@ -95,33 +120,40 @@ def save_book():
             return books()
         except Exception as e:
             return f"Erreur: {e}"
-    
-        
-    
     return render_template("books/add_book.html", form=f)
     
 @app.route("/detail/<id>")
 @login_required
 def detail(id):
-    #books = get_sample()
-    #book = books[int(id)]
+    """Route vers les détails d'un livre.
+    """
     book = Book.query.get(int(id))
     return render_template("books/detail.html", book=book)
 
 @app.route("/edit/book/<int:id>", methods=["GET", "POST"])
 @login_required
 def edit_book(id):
+    """Route vers l'édition d'un livre.
+    Accessible en méthode GET et POST.
+    En méthode GET, le formulaire est pré-rempli avec les informations du livre à modifier (id).
+    En méthode POST, les informations du livre sont mises à jour dans la base de données.
+
+    Args:
+        id (int): Identifiant du livre à modifier
+    """
     b = Book.query.get(id)
     f = BookForm()
     f.set_choices(Author.query.all())
     
-    if f.validate_on_submit():
+    if f.validate_on_submit(): #Méthode POST
         b.title = f.title.data
         b.price = f.price.data
         b.author_id = f.author.data
         b.url = f.url.data
         db.session.commit()
         return redirect(url_for("books"))
+    
+    #Méthode GET
     
     f = BookForm(
         id=b.id,
@@ -135,6 +167,11 @@ def edit_book(id):
 @app.route("/delete/book/<int:id>")
 @login_required
 def delete_book(id):
+    """Route vers la suppression d'un livre.
+
+    Args:
+        id (int): Identifiant du livre à supprimer
+    """
     b = Book.query.get(id)
     db.session.delete(b)
     db.session.commit()
@@ -143,22 +180,35 @@ def delete_book(id):
 @app.route("/authors")
 @login_required
 def authors():
+    """Route vers la liste des auteurs.
+    """
     return render_template("authors/author.html", authors=Author.query.all())
 
 @app.route("/add/author")
 @login_required
 def add_author():
+    """Route vers l'ajout d'un auteur.
+    """
     f = AuthorForm()
     return render_template("authors/add_author.html", form=f)
 
 @app.route("/edit/author/<int:id>")
 @login_required
 def edit_author(id):
+    """Route vers l'édition d'un auteur.
+
+    Args:
+        id (int): Identifiant de l'auteur à modifier
+    """
     a = get_author(id)
     f = AuthorForm(id=a.id, name=a.name)
     return render_template("authors/edit_author.html", author=a, form=f)
 
 def delete_author():
+    """
+    Supprime un auteur de la base de données.
+    Cette fonction est appelée lors de la soumission du formulaire de suppression d'un auteur.
+    """
     a = None
     f = AuthorForm()
     if f.validate_on_submit():
@@ -175,19 +225,29 @@ def delete_author():
 @app.route("/save/author", methods=["POST"])
 @login_required
 def save_author():
+    """Route vers la sauvegarde d'un auteur.
+
+    Accessible en méthode POST.
+    
+    Si le formulaire est valide,
+        - si l'utilisateur a cliqué sur le bouton "Supprimer" : l'auteur est supprimé de la base de données
+        - sinon, l'utilisateur a cliqué sur le bouton "Enregistrer" :
+            - si l'auteur existe déjà, il est mis à jour dans la base de données    
+            - sinon, un nouvel auteur est ajouté à la base de données
+    """
     a = None
     f = AuthorForm()
     if f.validate_on_submit():
         if request.form.get("action") == "Supprimer":
             return delete_author()
 
-        if f.id.data:
+        if f.id.data: #Modification de l'auteur existant
             id = int(f.id.data)
             a = get_author(id)
             a.name = f.name.data
             db.session.commit()
             return redirect(url_for("edit_author", id=id))
-        else:
+        else: #Ajout d'un nouvel auteur
             a = Author()
             a.name = f.name.data
             db.session.add(a)
@@ -197,8 +257,14 @@ def save_author():
     a = get_author(int(f.id.data))
     return render_template("authors/edit_author.html", author=a, form=f)
 
-@app.route("/login/", methods=("GET", "POST", ))
+@app.route("/login/", methods=["GET", "POST"])
 def login():
+    """Route vers la page d'autentification.
+    Accessible en méthode GET et POST.
+    En méthode GET, affiche le formulaire de connexion.
+    En méthode POST, vérifie les informations de connexion
+        et redirige vers la page d'accueil ou vers la redirection, si les informations sont correctes.
+    """
     f = LoginForm()
     if not f.is_submitted():
         f.next.data = request.args.get("next")
@@ -214,6 +280,8 @@ def login():
 
 @app.route("/logout/")
 def logout():
+    """Route vers la déconnexion.
+    """
     logout_user()
     return redirect(url_for('home'))
 
