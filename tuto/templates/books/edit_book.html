@@ -8,27 +8,14 @@
 
 {% block content %}
 <h1>Edit book: {{ book.title }}, {{ book.author }}</h1>
-<form method="POST" action="{{ url_for('save_author') }}">
+<form method="POST" action="{{ url_for('save_book') }}">
     {{ form.hidden_tag() }}
-    <div class=
-        {% if form.name.errors %}
-            "form-group has-error"
-        {% else %}
-            "form-group"
-        {% endif %}
-        >
-        {{ form.name.label }} {{ form.name(size=50, class_="form-control") }}
-    </div>
-    {% if form.name.errors %}
-        <ul class="list-group">
-            {% for e in form.name.errors %}
-                <li class="list-group-item list-group-item-danger">{{ e }}</li>
-            {% endfor %}
-        </ul>
-    {% endif %}
+    
+    <!-- TODO -->
+    
     {% if current_user.is_authenticated %}
         <input class="btn btn-primary" type="submit" name="action" value="Enregistrer">
-        <input class="btn btn-danger" type="submit" name="action" value="Supprimer">
+        <input class="btn btn-danger" type="submit" name="action" value="Annuler">
     {% endif %}
 </form>
 {% endblock %}
