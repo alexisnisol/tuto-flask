@@ -30,7 +30,6 @@ class Favorite(db.Model):
     books = db.relationship('Book', back_populates='favorites')
     users = db.relationship('User', back_populates='favorites')
 
-
 class Book(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     price = db.Column(db.Float)
@@ -43,6 +42,12 @@ class Book(db.Model):
 
     def __repr__(self):
         return "<Book (%d) %s>" % (self.id, self.title)
+
+
+def get_paginate(num_page):
+    #return db.paginate(db.select(Book).order_by(Book.author_id), num_page, 10)
+    return Book.query.paginate(page=num_page, error_out=False, max_per_page=10)
+
 
 def get_sample():
     return Book.query.all()
