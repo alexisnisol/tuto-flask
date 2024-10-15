@@ -1,6 +1,6 @@
 from .app import app, db, mkpath
 from flask import render_template, url_for, redirect, request
-from .models import get_author, get_sample, Book, Author, User
+from .models import get_author, get_sample, Book, Author, User, Favorite, get_paginate
 from flask_wtf import FlaskForm
 from wtforms import StringField, HiddenField, PasswordField, SelectField, DecimalField
 from flask_wtf.file import FileField, FileAllowed, FileRequired
@@ -71,13 +71,21 @@ def home():
     return render_template(
         "home.html",
         title="Page d'accueil",
-        books=[])
+        books=[],
+        favorites=[])
 
 @app.route("/books")
 def books():
     """Route vers la liste des livres.
     """
-    return render_template("home.html", title="", books=get_sample())
+
+    num_page = request.args.get('page', 1, type=int)
+
+    les_favoris = Favorite.query.filter_by(user_id=current_user.username).all()
+    les_livres_favoris = [fav.books for fav in les_favoris]
+
+    pagination = get_paginate(num_page)
+    return render_template("home.html", title="", books=pagination.items, pagination=pagination, favorites=les_livres_favoris)
 
 @app.route("/add/book")
 @login_required
@@ -121,14 +129,38 @@ def save_book():
         except Exception as e:
             return f"Erreur: {e}"
     return render_template("books/add_book.html", form=f)
-    
+
+@app.route("/favorite/<id>")
+@login_required
+def favorite_book(id):
+    """Route vers l'ajout d'un livre en favori.
+    """
+    b = Book.query.get(int(id))
+
+    #check if user has already favorited the book
+    fav = Favorite.query.filter_by(book_id=b.id, user_id=current_user.username).first()
+    if fav:
+        db.session.delete(fav)
+    else:
+        fav = Favorite(
+            book_id=b.id,
+            user_id=current_user.username)
+        db.session.add(fav)
+
+    db.session.commit()
+    return redirect(url_for("books"))
+
 @app.route("/detail/<id>")
 @login_required
 def detail(id):
     """Route vers les détails d'un livre.
     """
     book = Book.query.get(int(id))
-    return render_template("books/detail.html", book=book)
+
+    #check if user has already favorited the book
+    fav = Favorite.query.filter_by(book_id=book.id, user_id=current_user.username).first()
+
+    return render_template("books/detail.html", book=book, is_favorite=fav is not None)
 
 @app.route("/edit/book/<int:id>", methods=["GET", "POST"])
 @login_required
@@ -160,7 +192,9 @@ def edit_book(id):
         title=b.title,
         price=b.price,
         author=b.author_id,
+        image = b.image,
         url=b.url)
+
     
     return render_template("books/edit_book.html", book=b, form=f)
 
