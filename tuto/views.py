@@ -81,8 +81,10 @@ def books():
 
     num_page = request.args.get('page', 1, type=int)
 
-    les_favoris = Favorite.query.filter_by(user_id=current_user.username).all()
-    les_livres_favoris = [fav.books for fav in les_favoris]
+    les_livres_favoris = []
+    if current_user.is_authenticated:
+        les_favoris = Favorite.query.filter_by(user_id=current_user.username).all()
+        les_livres_favoris = [fav.books for fav in les_favoris]
 
     pagination = get_paginate(num_page)
     return render_template("home.html", title="", books=pagination.items, pagination=pagination, favorites=les_livres_favoris)
