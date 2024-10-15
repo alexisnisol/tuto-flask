@@ -1,6 +1,6 @@
 from .app import app, db, mkpath
 from flask import render_template, url_for, redirect, request
-from .models import get_author, get_sample, Book, Author, User, Favorite, get_paginate
+from .models import get_author, get_sample, Book, Author, User, Favorite, get_paginate, remove_book
 from flask_wtf import FlaskForm
 from wtforms import StringField, HiddenField, PasswordField, SelectField, DecimalField
 from flask_wtf.file import FileField, FileAllowed, FileRequired
@@ -208,9 +208,7 @@ def delete_book(id):
     Args:
         id (int): Identifiant du livre à supprimer
     """
-    b = Book.query.get(id)
-    db.session.delete(b)
-    db.session.commit()
+    remove_book(id)
     return redirect(url_for("books"))
 
 @app.route("/authors")

@@ -43,6 +43,15 @@ class Book(db.Model):
     def __repr__(self):
         return "<Book (%d) %s>" % (self.id, self.title)
 
+def remove_book(id):
+    b = Book.query.get(id)
+
+    #remove all favorites for this book
+    for fav in Favorite.query.filter_by(book_id=b.id).all():
+        db.session.delete(fav)
+
+    db.session.delete(b)
+    db.session.commit()
 
 def get_paginate(num_page):
     return Book.query.join(Author).order_by(Author.name).paginate(page=num_page, error_out=False, max_per_page=10)
