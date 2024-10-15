@@ -1,6 +1,6 @@
 from .app import app, db, mkpath
 from flask import render_template, url_for, redirect, request
-from .models import get_author, get_sample, Book, Author, User, Favorite, get_paginate
+from .models import get_author, get_sample, Book, Author, User, Favorite, get_paginate, remove_book
 from flask_wtf import FlaskForm
 from wtforms import StringField, HiddenField, PasswordField, SelectField, DecimalField
 from flask_wtf.file import FileField, FileAllowed, FileRequired
@@ -80,8 +80,10 @@ def books():
 
     num_page = request.args.get('page', 1, type=int)
 
-    les_favoris = Favorite.query.filter_by(user_id=current_user.username).all()
-    les_livres_favoris = [fav.books for fav in les_favoris]
+    les_livres_favoris = []
+    if current_user.is_authenticated:
+        les_favoris = Favorite.query.filter_by(user_id=current_user.username).all()
+        les_livres_favoris = [fav.books for fav in les_favoris]
 
     pagination = get_paginate(num_page)
     return render_template("home.html", title="", books=pagination.items, pagination=pagination, favorites=les_livres_favoris)
@@ -208,9 +210,7 @@ def delete_book(id):
     Args:
         id (int): Identifiant du livre à supprimer
     """
-    b = Book.query.get(id)
-    db.session.delete(b)
-    db.session.commit()
+    remove_book(id)
     return redirect(url_for("books"))
 
 @app.route("/authors")
