@@ -20,8 +20,15 @@ from flask_login import UserMixin
 class Author(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100))
+
     def __repr__(self):
         return "Author (%d) %s" % (self.id, self.name)
+
+class Favorite(db.Model):
+    book_id = db.Column(db.Integer, db.ForeignKey('book.id'), primary_key=True)
+    user_id = db.Column(db.String(50), db.ForeignKey('user.username'), primary_key=True)
+    books = db.relationship('Book', back_populates='favorites')
+    users = db.relationship('User', back_populates='favorites')
 
 class Book(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -31,9 +38,16 @@ class Book(db.Model):
     title = db.Column(db.String(100))
     author_id = db.Column(db.Integer, db.ForeignKey('author.id'))
     author = db.relationship('Author', backref=db.backref('books', lazy='dynamic')) #dynamic => suppression en cascade etc.
+    favorites = db.relationship('Favorite', back_populates='books')
 
     def __repr__(self):
         return "<Book (%d) %s>" % (self.id, self.title)
+
+
+def get_paginate(num_page):
+    #return db.paginate(db.select(Book).order_by(Book.author_id), num_page, 10)
+    return Book.query.paginate(page=num_page, error_out=False, max_per_page=10)
+
 
 def get_sample():
     return Book.query.all()
@@ -44,6 +58,7 @@ def get_author(id):
 class User(db.Model, UserMixin):
     username = db.Column(db.String(50), primary_key=True)
     password = db.Column(db.String(64))
+    favorites = db.relationship('Favorite', back_populates='users')
 
     def get_id(self):
         return self.username
