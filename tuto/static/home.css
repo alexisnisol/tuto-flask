@@ -40,3 +40,8 @@ div.sample img:hover{
 .add_button {
     margin-bottom: 2em;
 }
+
+#finish_edit_button {
+    margin-top: 1em;
+    margin-bottom: 5em;
+}

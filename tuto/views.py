@@ -31,7 +31,6 @@ class BookForm(FlaskForm):
     author = SelectField('Auteur', choices=[], validators=[DataRequired()])
     url = StringField('URL', validators=[DataRequired()])
     image = FileField('image', validators=[
-        FileRequired(),
         FileAllowed(['jpg', 'png'], 'Images only!')
     ])
 
@@ -96,6 +95,7 @@ def save_book():
     """
     b = None
     f = BookForm()
+    f.image.validators.append(FileRequired())
     f.set_choices(Author.query.all())
     if f.validate_on_submit():
         a = Author.query.get(f.author.data)
@@ -145,23 +145,27 @@ def edit_book(id):
     f = BookForm()
     f.set_choices(Author.query.all())
     
-    if f.validate_on_submit(): #Méthode POST
+    if f.validate_on_submit():
         b.title = f.title.data
         b.price = f.price.data
         b.author_id = f.author.data
         b.url = f.url.data
+        
+        # si il y une nouvelle image
+        if f.image.data:
+            b.image = f.image.data.filename
+
         db.session.commit()
         return redirect(url_for("books"))
-    
-    #Méthode GET
     
     f = BookForm(
         id=b.id,
         title=b.title,
         price=b.price,
         author=b.author_id,
-        url=b.url)
-    
+        url=b.url
+    )
+    f.set_choices(Author.query.all())
     return render_template("books/edit_book.html", book=b, form=f)
 
 @app.route("/delete/book/<int:id>")
