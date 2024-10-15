@@ -45,8 +45,7 @@ class Book(db.Model):
 
 
 def get_paginate(num_page):
-    #return db.paginate(db.select(Book).order_by(Book.author_id), num_page, 10)
-    return Book.query.paginate(page=num_page, error_out=False, max_per_page=10)
+    return Book.query.join(Author).order_by(Author.name).paginate(page=num_page, error_out=False, max_per_page=10)
 
 
 def get_sample():
