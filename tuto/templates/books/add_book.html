@@ -21,6 +21,18 @@
         </ul>
     {% endif %}
 
+    <!-- Multiple Selection : genres -->
+    <div class="form-group">
+        {{ form.genres.label }} {{ form.genres(class_="form-control") }}
+    </div>
+    {% if form.genres.errors %}
+        <ul class="list-group">
+            {% for e in form.genres.errors %}
+                <li class="list-group-item list-group-item-danger">{{ e }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+
     <div class="form-group">
         {{ form.price.label }} {{ form.price(size=50, class_="form-control") }}
     </div>

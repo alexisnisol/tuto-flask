@@ -5,15 +5,6 @@
 #        os.path.dirname(__file__),
 #        "static/data.yml")))
 
-#i = 0
-#for book in Books:
-    #book['id'] = i
-    #i += 1
-
-#def get_books():
- #   return Books
-
-
 from .app import db, login_manager
 from flask_login import UserMixin
 
@@ -30,6 +21,20 @@ class Favorite(db.Model):
     books = db.relationship('Book', back_populates='favorites')
     users = db.relationship('User', back_populates='favorites')
 
+genresDeLivres = db.Table(
+    'genresDeLivres',
+    db.Model.metadata,
+    db.Column('genre', db.String(50), db.ForeignKey('genres.name')),
+    db.Column('book', db.Integer, db.ForeignKey('book.id'))
+)
+
+class Genres(db.Model):
+    name = db.Column(db.String(50), primary_key=True)
+    books = db.relationship('Book', secondary=genresDeLivres, back_populates='genres')
+
+    def __repr__(self):
+        return self.name
+
 class Book(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     price = db.Column(db.Float)
@@ -39,6 +44,7 @@ class Book(db.Model):
     author_id = db.Column(db.Integer, db.ForeignKey('author.id'))
     author = db.relationship('Author', backref=db.backref('books', lazy='dynamic')) #dynamic => suppression en cascade etc.
     favorites = db.relationship('Favorite', back_populates='books')
+    genres = db.relationship('Genres', secondary=genresDeLivres, back_populates='books')
 
     def __repr__(self):
         return "<Book (%d) %s>" % (self.id, self.title)
@@ -55,7 +61,6 @@ def remove_book(id):
 
 def get_paginate(num_page):
     return Book.query.join(Author).order_by(Author.name).paginate(page=num_page, error_out=False, max_per_page=10)
-
 
 def get_sample():
     return Book.query.all()

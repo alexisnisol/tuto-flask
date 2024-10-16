@@ -68,3 +68,25 @@ def passwd(username, password):
     u = load_user(username)
     u.password = m.hexdigest()
     db.session.commit()
+
+
+@app.cli.command()
+@click.argument('name')
+def newgenre(name):
+    '''Adds a new genre.'''
+    from .models import Genres
+    g = Genres(name=name)
+    db.session.add(g)
+    db.session.commit()
+
+
+@app.cli.command()
+@click.argument('id_book')
+@click.argument('nom_genre')
+def setgenre(id_book, nom_genre):
+    '''Adds a genre to a book.'''
+    from .models import Book, Genres
+    g = Genres.query.get(nom_genre)
+    b = Book.query.get(id_book)
+    b.genres.append(g)
+    db.session.commit()
