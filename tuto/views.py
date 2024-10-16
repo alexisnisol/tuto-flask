@@ -367,4 +367,46 @@ def search():
         books = les_livres,
         favorites = les_livres_favoris
         )
+
+@app.route("/advanced_search", methods=["GET", "POST"])
+def advanced_search():
+    """
+    route vers la fonctionnalité de recherche avancée
+    """
+    f = AdvancedSearchForm()
+    f.set_choices(Author.query.all())
+    if f.validate_on_submit():
+        # récupération des données
+        title = f.title.data
+        author = f.author.data
+        price_min = f.price_min.data
+        price_max = f.price_max.data
+        # les livres filtrés
+        les_livres = Book.query
+        if title:
+            les_livres = les_livres.filter(Book.title.ilike(f'%{title}%'))
+        if author != "":
+            les_livres = les_livres.filter(Book.author_id == author)
+        if price_min:
+            les_livres = les_livres.filter(Book.price >= price_min)
+        if price_max:
+            les_livres = les_livres.filter(Book.price <= price_max)
+        les_livres = les_livres.all()
+        # les livres favoris
+        les_livres_favoris = []
+        if current_user.is_authenticated:
+            les_favoris = Favorite.query.filter_by(user_id=current_user.username).all()
+            for fav in les_favoris:
+                book = fav.books
+                if title in book.title:
+                    les_livres_favoris.append(book)
+        # la template
+        return render_template(
+            "books/advanced_search.html",
+            title = "Recherche avancée",
+            books = les_livres,
+            favorites = les_livres_favoris,
+            form = f
+            )
+    return render_template("books/advanced_search.html", form=f)
 #request.args.get('query')
