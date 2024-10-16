@@ -249,7 +249,8 @@ def edit_author(id):
     """
     a = get_author(id)
     f = AuthorForm(id=a.id, name=a.name)
-    return render_template("authors/edit_author.html", author=a, form=f)
+    lesLivres = Book.query.filter_by(author_id = a.id)
+    return render_template("authors/edit_author.html", author=a, form=f, books = lesLivres)
 
 def delete_author():
     """
