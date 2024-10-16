@@ -318,5 +318,29 @@ def logout():
     logout_user()
     return redirect(url_for('home'))
 
-
+@app.route("/search")
+def search():
+    """
+    route vers la fonctionnalité de recherche
+    d'un livre par nom
+    """
+    nom_livre = request.args.get("query")
+    num_page = request.args.get('page', 1, type = int)
+    # les livres filtrés par nom
+    les_livres = Book.query.filter_by(title = nom_livre)
+    les_livres_favoris = []
+    # récupération des livres favoris
+    if current_user.is_authenticated:
+        les_favoris = Favorite.query.filter_by(user_id=current_user.username).all()
+        for fav in les_favoris:
+            book = fav.books
+            if book.title == nom_livre:
+                les_livres_favoris.append(book)
+    # la template
+    return render_template(
+        "books/searched_name.html",
+        title = "Recherche par nom : \n" + nom_livre,
+        books = les_livres,
+        favorites = les_livres_favoris
+        )
 #request.args.get('query')
