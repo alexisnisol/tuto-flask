@@ -6,11 +6,11 @@ div.sample{
     text-align: center;
     margin-left: 25%;
     margin-right: 25%;
-    margin-bottom: 5%;
 }
 
 main{
     margin-top: 4em;
+    margin-bottom: 4em;
 }
 
 footer{
@@ -38,11 +38,7 @@ div.sample img:hover{
 .pagination {
     display: flex;
     justify-content: center;
-    margin-top: 2em;
-}
-
-.add_button {
-    margin-bottom: 2em;
+    margin-top: 1em;
 }
 
 #finish_edit_button {

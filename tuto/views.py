@@ -1,8 +1,8 @@
 from .app import app, db, mkpath
 from flask import render_template, url_for, redirect, request
-from .models import get_author, get_sample, Book, Author, User, Favorite, get_paginate, remove_book
+from .models import get_author, get_sample, Book, Author, User, Favorite, Genres, get_paginate, remove_book
 from flask_wtf import FlaskForm
-from wtforms import StringField, HiddenField, PasswordField, SelectField, DecimalField
+from wtforms import StringField, HiddenField, PasswordField, SelectField, DecimalField, SelectMultipleField
 from flask_wtf.file import FileField, FileAllowed, FileRequired
 from wtforms.validators import DataRequired, Optional
 from hashlib import sha256
@@ -27,12 +27,21 @@ class BookForm(FlaskForm):
     """
     id = HiddenField('id')
     title = StringField('Titre', validators=[DataRequired()])
+    genres = SelectMultipleField('Genre', validators=[DataRequired()])
     price = DecimalField('Prix', validators=[DataRequired()])
     author = SelectField('Auteur', choices=[], validators=[DataRequired()])
     url = StringField('URL', validators=[DataRequired()])
     image = FileField('image', validators=[
         FileAllowed(['jpg', 'png'], 'Images only!')
     ])
+
+    def __init__(self, *args, **kwargs):
+        super(BookForm, self).__init__(*args, **kwargs)
+        self.set_genres(Genres.query.all())
+        self.set_choices(Author.query.all())
+
+    def set_genres(self, genres):
+        self.genres.choices = [(g.name, g.name) for g in genres]
 
     def set_choices(self, authors):
         self.author.choices = [(a.id, a.name) for a in authors]
@@ -113,7 +122,6 @@ def add_book():
     """Route vers l'ajout d'un nouveau livre.
     """
     f = BookForm()
-    f.set_choices(Author.query.all())
     return render_template("books/add_book.html", form=f)
 
 @app.route("/save/book", methods=["POST"])
@@ -125,7 +133,6 @@ def save_book():
     b = None
     f = BookForm()
     f.image.validators.append(FileRequired())
-    f.set_choices(Author.query.all())
     if f.validate_on_submit():
         a = Author.query.get(f.author.data)
         b = Book(
@@ -135,6 +142,10 @@ def save_book():
             title=f.title.data,
             author_id= a.id)
         f.image.validators.pop()
+        
+        for genre in f.genres.data:
+            g = Genres.query.filter_by(name=genre).first()
+            b.genres.append(g)
     
         #add image to static folder
         try:
@@ -204,7 +215,11 @@ def edit_book(id):
         b.price = f.price.data
         b.author_id = f.author.data
         b.url = f.url.data
-
+        b.genres.clear()
+        for genre in f.genres.data:
+            g = Genres.query.filter_by(name=genre).first()
+            b.genres.append(g)
+        
         # si il y une nouvelle image
         if f.image.data:
             b.image = f.image.data.filename
@@ -215,11 +230,11 @@ def edit_book(id):
     f = BookForm(
         id=b.id,
         title=b.title,
+        genres=[g.name for g in b.genres],
         price=b.price,
         author=b.author_id,
         url=b.url
     )
-    f.set_choices(Author.query.all())
     return render_template("books/edit_book.html", book=b, form=f)
 
 @app.route("/delete/book/<int:id>")
@@ -258,7 +273,8 @@ def edit_author(id):
     """
     a = get_author(id)
     f = AuthorForm(id=a.id, name=a.name)
-    return render_template("authors/edit_author.html", author=a, form=f)
+    lesLivres = Book.query.filter_by(author_id = a.id)
+    return render_template("authors/edit_author.html", author=a, form=f, books = lesLivres)
 
 def delete_author():
     """

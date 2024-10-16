@@ -31,4 +31,13 @@
         <input class="btn btn-danger" type="submit" name="action" value="Supprimer">
     {% endif %}
 </form>
+
+<div class="sample">
+    <h2>Nos livres</h2>
+    {% for book in books %}
+    <a href="{{ url_for('detail', id=book.id)}}">
+        <img src="{{ url_for('static', filename='images/'+book.image)}}" alt="{{book.title}}" title="{{book.title}}" width="100" height="150">
+    </a>
+    {% endfor %}
+</div>
 {% endblock %}

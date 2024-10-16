@@ -14,6 +14,13 @@
         <h5 class="card-text card-footer">
                 Auteur : {{ book.author }}
         </h5>
+
+        {% if book.genres|length >= 1 %}
+        <h6 class="card-text card-footer">
+                Genre : {{ book.genres }}
+        </h6>
+        {% endif %}
+        
         <h6 class="card-text card-footer">
                 Prix : {{ book.price }} €
         </h6>
