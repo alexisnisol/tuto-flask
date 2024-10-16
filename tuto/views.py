@@ -333,5 +333,30 @@ def logout():
     logout_user()
     return redirect(url_for('home'))
 
-
+@app.route("/search")
+def search():
+    """
+    route vers la fonctionnalité de recherche
+    d'un livre par nom
+    """
+    nom_livre = request.args.get("query")
+    # les livres filtrés par nom
+    # session.query(TableName).filter(TableName.colName.ilike(f'%{search_text}%')).all()
+    # copilot : apply above line on avariable names les_livres
+    les_livres = Book.query.filter(Book.title.ilike(f'%{nom_livre}%')).all()
+    les_livres_favoris = []
+    # récupération des livres favoris
+    if current_user.is_authenticated:
+        les_favoris = Favorite.query.filter_by(user_id=current_user.username).all()
+        for fav in les_favoris:
+            book = fav.books
+            if nom_livre in book.title:
+                les_livres_favoris.append(book)
+    # la template
+    return render_template(
+        "books/searched_name.html",
+        title = "Recherche par nom : \n" + nom_livre,
+        books = les_livres,
+        favorites = les_livres_favoris
+        )
 #request.args.get('query')
