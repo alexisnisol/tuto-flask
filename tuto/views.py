@@ -4,7 +4,7 @@ from .models import get_author, get_sample, Book, Author, User, Favorite, get_pa
 from flask_wtf import FlaskForm
 from wtforms import StringField, HiddenField, PasswordField, SelectField, DecimalField
 from flask_wtf.file import FileField, FileAllowed, FileRequired
-from wtforms.validators import DataRequired
+from wtforms.validators import DataRequired, Optional
 from hashlib import sha256
 from flask_login import login_user, current_user, logout_user, login_required
 
@@ -36,6 +36,29 @@ class BookForm(FlaskForm):
 
     def set_choices(self, authors):
         self.author.choices = [(a.id, a.name) for a in authors]
+
+class AdvancedSearchForm(FlaskForm):
+    """Formulaire de recherche avancée
+    """
+    title = StringField('Titre', 
+                        render_kw={"placeholder": "(optionnel) Entrez le titre du livre"}, 
+                        validators=[Optional()])
+    
+    author = SelectField('Auteur', 
+                         choices=[], 
+                         default=None, 
+                         validators=[Optional()])
+    
+    price_min = DecimalField('Prix Min', 
+                             render_kw={"placeholder": "(optionnel) Prix minimum"}, 
+                             validators=[Optional()])
+    
+    price_max = DecimalField('Prix Max', 
+                             render_kw={"placeholder": "(optionnel) Prix maximum"}, 
+                             validators=[Optional()])
+
+    def set_choices(self, authors):
+        self.author.choices = [("", "Aucun")] + [(a.id, a.name) for a in authors]
 
 class LoginForm(FlaskForm):
     """Formulaire de connexion
@@ -175,20 +198,20 @@ def edit_book(id):
     b = Book.query.get(id)
     f = BookForm()
     f.set_choices(Author.query.all())
-    
+
     if f.validate_on_submit():
         b.title = f.title.data
         b.price = f.price.data
         b.author_id = f.author.data
         b.url = f.url.data
-        
+
         # si il y une nouvelle image
         if f.image.data:
             b.image = f.image.data.filename
 
         db.session.commit()
         return redirect(url_for("books"))
-    
+
     f = BookForm(
         id=b.id,
         title=b.title,
