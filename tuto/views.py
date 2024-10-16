@@ -67,11 +67,7 @@ class LoginForm(FlaskForm):
 def home():
     """Route vers la page d'accueil.
     """
-    return render_template(
-        "home.html",
-        title="Page d'accueil",
-        books=[],
-        favorites=[])
+    return redirect(url_for("books"))
 
 @app.route("/books")
 def books():
@@ -115,6 +111,7 @@ def save_book():
             image=f.image.data.filename,
             title=f.title.data,
             author_id= a.id)
+        f.image.validators.pop()
     
         #add image to static folder
         try:
