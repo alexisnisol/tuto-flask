@@ -45,9 +45,32 @@ class Book(db.Model):
     author = db.relationship('Author', backref=db.backref('books', lazy='dynamic')) #dynamic => suppression en cascade etc.
     favorites = db.relationship('Favorite', back_populates='books')
     genres = db.relationship('Genres', secondary=genresDeLivres, back_populates='books')
+    notes = db.relationship('Note', back_populates='book')
 
     def __repr__(self):
         return "<Book (%d) %s>" % (self.id, self.title)
+
+class Note(db.Model):
+    user_id = db.Column(db.String(50), db.ForeignKey('user.username'), primary_key=True)
+    value = db.Column(db.Integer)
+    book_id = db.Column(db.Integer, db.ForeignKey('book.id'), primary_key=True)
+    book = db.relationship('Book', back_populates='notes')
+    user = db.relationship('User', back_populates='notes')
+
+def avg_note(book_id : int):
+    """
+    Return the average note of a book
+    
+    Parameters:
+        book_id (int): the id of the book
+
+    Returns:
+        float: the average note of the book
+    """
+    notes = Note.query.filter_by(book_id=book_id).all()
+    if len(notes) == 0:
+        return None
+    return sum([note.value for note in notes]) / len(notes)
 
 def remove_book(id):
     b = Book.query.get(id)
@@ -72,6 +95,7 @@ class User(db.Model, UserMixin):
     username = db.Column(db.String(50), primary_key=True)
     password = db.Column(db.String(64))
     favorites = db.relationship('Favorite', back_populates='users')
+    notes = db.relationship('Note', back_populates='user')
 
     def get_id(self):
         return self.username

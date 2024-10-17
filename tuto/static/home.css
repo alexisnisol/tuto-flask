@@ -45,3 +45,13 @@ div.sample img:hover{
     margin-top: 1em;
     margin-bottom: 5em;
 }
+
+#ulNote {
+    list-style-type: none;
+    padding: 0;
+    width: 15em;
+}
+
+.li_btn_note {
+    display: inline;
+}

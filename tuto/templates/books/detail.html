@@ -20,6 +20,32 @@
                 Genre : {{ book.genres }}
         </h6>
         {% endif %}
+
+
+        <h6 class="card-text card-footer">
+                {% if note!=None %}
+                        Note : {{ note }}
+                        <br/>
+                {% endif %}
+                {% if note_donne!=None %}
+                        Note donnée : {{ note_donne }}
+                        <form action="{{ url_for('detail', id=book.id) }}" method="post">
+                                <button type="submit" name="suppr_note" value="None" class="btn btn-danger">Supprimer la note</button>
+                        </form>
+                {% else %}
+                <p>Donner une note</p>
+                <form action="{{ url_for('detail', id=book.id) }}" method="post">
+                        <ul id="ulNote">
+                                {% for i in range(6) %}
+                                        <li class="li_btn_note">
+                                                <button type="submit" name="note" value="{{ i }}" class="btn btn-primary">{{ i }}</button>
+                                        </li>
+                                {% endfor %}
+                        </ul>
+                </form>
+                {% endif %}
+        </h6>
+
         
         <h6 class="card-text card-footer">
                 Prix : {{ book.price }} €
