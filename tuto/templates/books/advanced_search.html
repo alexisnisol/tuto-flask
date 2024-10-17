@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+
+{% block styles %}
+{{ super() }}
+<link rel="stylesheet" href="{{ url_for('static', filename='home.css') }}">
+{% endblock %}
+
+
+{% block content %}
+<h1>Recherche avancée : </h1>
+<form method="POST" action="{{ url_for('advanced_search') }}" enctype="multipart/form-data">
+    {{ form.hidden_tag() }}
+    <div class="form-group">
+        {{ form.title.label }} {{ form.title(size=50, class_="form-control") }}
+    </div>
+    {% if form.title.errors %}
+        <ul class="list-group">
+            {% for e in form.title.errors %}
+                <li class="list-group-item list-group-item-danger">{{ e }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+
+    <div class="form-group">
+        {{ form.author.label }} {{ form.author(class_="form-control") }}
+    </div>
+    {% if form.author.errors %}
+        <ul class="list-group">
+            {% for e in form.author.errors %}
+                <li class="list-group-item list-group-item-danger">{{ e }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+
+    
+    <div class="form-group">
+        {{ form.price_min.label }} {{ form.price_min(class_="form-control") }}
+    </div>
+    {% if form.price_min.errors %}
+        <ul class="list-group">
+            {% for e in form.price_min.errors %}
+                <li class="list-group-item list-group-item-danger">{{ e }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+
+    <div class="form-group">
+        {{ form.price_max.label }} {{ form.price_max(class_="form-control") }}
+    </div>
+    {% if form.price_max.errors %}
+        <ul class="list-group">
+            {% for e in form.price_max.errors %}
+                <li class="list-group-item list-group-item-danger">{{ e }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+
+    <input id="get_result_button" class="btn btn-primary" type="submit" value="Rechercher">
+</form>
+<div class="sample">
+
+    {% if current_user.is_authenticated %}
+        {% if favorites %}
+        <h2>Vos favoris</h2>
+        <div class="books">
+            {% for book in favorites %}
+            <a href="{{ url_for('detail', id=book.id)}}">
+                <img src="{{ url_for('static', filename='images/'+book.image)}}" alt="{{book.title}}" title="{{book.title}}" width="100" height="150">
+            </a>
+            {% endfor %}
+        </div>
+        {% endif %}
+    {% endif %}
+
+    <h2>Nos livres</h2>
+    {% for book in books %}
+    <a href="{{ url_for('detail', id=book.id)}}">
+        <img src="{{ url_for('static', filename='images/'+book.image)}}" alt="{{book.title}}" title="{{book.title}}" width="100" height="150">
+    </a>
+    {% endfor %}
+    
+</div>
+{% endblock %}

@@ -4,7 +4,7 @@ from .models import get_author, get_sample, Book, Author, User, Favorite, Genres
 from flask_wtf import FlaskForm
 from wtforms import StringField, HiddenField, PasswordField, SelectField, DecimalField, SelectMultipleField
 from flask_wtf.file import FileField, FileAllowed, FileRequired
-from wtforms.validators import DataRequired
+from wtforms.validators import DataRequired, Optional
 from hashlib import sha256
 from flask_login import login_user, current_user, logout_user, login_required
 
@@ -45,6 +45,29 @@ class BookForm(FlaskForm):
 
     def set_choices(self, authors):
         self.author.choices = [(a.id, a.name) for a in authors]
+
+class AdvancedSearchForm(FlaskForm):
+    """Formulaire de recherche avancée
+    """
+    title = StringField('Titre', 
+                        render_kw={"placeholder": "(optionnel) Entrez le titre du livre"}, 
+                        validators=[Optional()])
+    
+    author = SelectField('Auteur', 
+                         choices=[], 
+                         default=None, 
+                         validators=[Optional()])
+    
+    price_min = DecimalField('Prix Min', 
+                             render_kw={"placeholder": "(optionnel) Prix minimum"}, 
+                             validators=[Optional()])
+    
+    price_max = DecimalField('Prix Max', 
+                             render_kw={"placeholder": "(optionnel) Prix maximum"}, 
+                             validators=[Optional()])
+
+    def set_choices(self, authors):
+        self.author.choices = [("", "Aucun")] + [(a.id, a.name) for a in authors]
 
 class LoginForm(FlaskForm):
     """Formulaire de connexion
@@ -185,7 +208,8 @@ def edit_book(id):
     """
     b = Book.query.get(id)
     f = BookForm()
-    
+    f.set_choices(Author.query.all())
+
     if f.validate_on_submit():
         b.title = f.title.data
         b.price = f.price.data
@@ -202,7 +226,7 @@ def edit_book(id):
 
         db.session.commit()
         return redirect(url_for("books"))
-    
+
     f = BookForm(
         id=b.id,
         title=b.title,
@@ -359,4 +383,46 @@ def search():
         books = les_livres,
         favorites = les_livres_favoris
         )
+
+@app.route("/advanced_search", methods=["GET", "POST"])
+def advanced_search():
+    """
+    route vers la fonctionnalité de recherche avancée
+    """
+    f = AdvancedSearchForm()
+    f.set_choices(Author.query.all())
+    if f.validate_on_submit():
+        # récupération des données
+        title = f.title.data
+        author = f.author.data
+        price_min = f.price_min.data
+        price_max = f.price_max.data
+        # les livres filtrés
+        les_livres = Book.query
+        if title:
+            les_livres = les_livres.filter(Book.title.ilike(f'%{title}%'))
+        if author != "":
+            les_livres = les_livres.filter(Book.author_id == author)
+        if price_min:
+            les_livres = les_livres.filter(Book.price >= price_min)
+        if price_max:
+            les_livres = les_livres.filter(Book.price <= price_max)
+        les_livres = les_livres.all()
+        # les livres favoris
+        les_livres_favoris = []
+        if current_user.is_authenticated:
+            les_favoris = Favorite.query.filter_by(user_id=current_user.username).all()
+            for fav in les_favoris:
+                book = fav.books
+                if title in book.title:
+                    les_livres_favoris.append(book)
+        # la template
+        return render_template(
+            "books/advanced_search.html",
+            title = "Recherche avancée",
+            books = les_livres,
+            favorites = les_livres_favoris,
+            form = f
+            )
+    return render_template("books/advanced_search.html", form=f)
 #request.args.get('query')
