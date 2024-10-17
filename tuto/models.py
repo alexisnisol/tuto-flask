@@ -57,6 +57,12 @@ class Note(db.Model):
     book = db.relationship('Book', back_populates='notes')
     user = db.relationship('User', back_populates='notes')
 
+def avg_note(book_id : int):
+    notes = Note.query.filter_by(book_id=book_id).all()
+    if len(notes) == 0:
+        return None
+    return sum([n.value for n in notes]) / len(notes)
+
 def remove_book(id):
     b = Book.query.get(id)
 

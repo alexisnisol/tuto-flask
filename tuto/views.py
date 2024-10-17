@@ -1,6 +1,6 @@
 from .app import app, db, mkpath
 from flask import render_template, url_for, redirect, request
-from .models import get_author, get_sample, Book, Author, User, Favorite, Genres, get_paginate, remove_book
+from .models import get_author, get_sample, Book, Author, User, Favorite, Genres, get_paginate, remove_book, Note, avg_note
 from flask_wtf import FlaskForm
 from wtforms import StringField, HiddenField, PasswordField, SelectField, DecimalField, SelectMultipleField
 from flask_wtf.file import FileField, FileAllowed, FileRequired
@@ -192,6 +192,8 @@ def detail(id):
 
     #check if user has already favorited the book
     fav = Favorite.query.filter_by(book_id=book.id, user_id=current_user.username).first()
+
+    note = Note.query.filter_by(book_id=book.id, usern_id=current_user.username).first()
 
     return render_template("books/detail.html", book=book, is_favorite=fav is not None)
 
@@ -424,5 +426,6 @@ def advanced_search():
             favorites = les_livres_favoris,
             form = f
             )
-    return render_template("books/advanced_search.html", form=f)
+    return render_template("books/advanced_search.html", form=f)")
+
 #request.args.get('query')
