@@ -183,7 +183,7 @@ def favorite_book(id):
     db.session.commit()
     return redirect(url_for("books"))
 
-@app.route("/detail/<id>")
+@app.route("/detail/<id>", methods=["GET", "POST"])
 @login_required
 def detail(id):
     """Route vers les détails d'un livre.
@@ -193,9 +193,32 @@ def detail(id):
     #check if user has already favorited the book
     fav = Favorite.query.filter_by(book_id=book.id, user_id=current_user.username).first()
 
-    note = Note.query.filter_by(book_id=book.id, usern_id=current_user.username).first()
+    note = avg_note(book.id)
+    if request.method == "POST":
+        note_donne = request.form.get("note")
+        if note_donne:
+            note_donne = int(note_donne)
+            n = Note(
+                user_id=current_user.username,
+                value=note_donne,
+                book_id=book.id
+            )
+            db.session.add(n)
+            db.session.commit()
 
-    return render_template("books/detail.html", book=book, is_favorite=fav is not None)
+        suppr_note = request.form.get("suppr_note")
+        if suppr_note:
+            n = Note.query.filter_by(user_id=current_user.username, book_id=book.id).first()
+            db.session.delete(n)
+            db.session.commit()
+            note = avg_note(book.id)
+        
+        note = avg_note(book.id)
+    
+    note_donne = Note.query.filter_by(user_id=current_user.username, book_id=book.id).first()
+    if note_donne:
+        note_donne = note_donne.value
+    return render_template("books/detail.html", book=book, is_favorite=fav is not None, note=note, note_donne=note_donne)
 
 @app.route("/edit/book/<int:id>", methods=["GET", "POST"])
 @login_required
@@ -426,6 +449,6 @@ def advanced_search():
             favorites = les_livres_favoris,
             form = f
             )
-    return render_template("books/advanced_search.html", form=f)")
+    return render_template("books/advanced_search.html", form=f)
 
 #request.args.get('query')
