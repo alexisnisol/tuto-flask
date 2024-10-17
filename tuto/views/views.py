@@ -1,99 +1,12 @@
-from .app import app, db, mkpath
+"""All functions that are called when a route is accessed are defined here."""
 from flask import render_template, url_for, redirect, request
-from .models import get_author, get_sample, Book, Author, User, Favorite, Genres, get_paginate, remove_book, Note, avg_note
-from flask_wtf import FlaskForm
-from wtforms import StringField, HiddenField, PasswordField, SelectField, DecimalField, SelectMultipleField
-from flask_wtf.file import FileField, FileAllowed, FileRequired
-from wtforms.validators import DataRequired, Optional
-from hashlib import sha256
+from flask_wtf.file import FileRequired
 from flask_login import login_user, current_user, logout_user, login_required
-
-class AuthorForm(FlaskForm):
-    """Formulaire pour la gestion des auteurs
-    """
-    id = HiddenField('id')
-    name = StringField('Nom', validators=[DataRequired()])
-
-class BookForm(FlaskForm):
-    """Formulaire pour la gestion des livres
-
-    Attributes:
-        id (HiddenField): Identifiant du livre
-        title (StringField): Titre du livre
-        price (DecimalField): Prix du livre
-        author (SelectField): Auteur du livre (liste déroulante des auteurs de la base de données)
-        url (StringField): URL du livre (lien vers la page amazon, fnac, ...)
-        image (FileField): Image de couverture du livre
-    """
-    id = HiddenField('id')
-    title = StringField('Titre', validators=[DataRequired()])
-    genres = SelectMultipleField('Genre', validators=[DataRequired()])
-    price = DecimalField('Prix', validators=[DataRequired()])
-    author = SelectField('Auteur', choices=[], validators=[DataRequired()])
-    url = StringField('URL', validators=[DataRequired()])
-    image = FileField('image', validators=[
-        FileAllowed(['jpg', 'png'], 'Images only!')
-    ])
-
-    def __init__(self, *args, **kwargs):
-        super(BookForm, self).__init__(*args, **kwargs)
-        self.set_genres(Genres.query.all())
-        self.set_choices(Author.query.all())
-
-    def set_genres(self, genres):
-        self.genres.choices = [(g.name, g.name) for g in genres]
-
-    def set_choices(self, authors):
-        self.author.choices = [(a.id, a.name) for a in authors]
-
-class AdvancedSearchForm(FlaskForm):
-    """Formulaire de recherche avancée
-    """
-    title = StringField('Titre', 
-                        render_kw={"placeholder": "(optionnel) Entrez le titre du livre"}, 
-                        validators=[Optional()])
-    
-    author = SelectField('Auteur', 
-                         choices=[], 
-                         default=None, 
-                         validators=[Optional()])
-    
-    price_min = DecimalField('Prix Min', 
-                             render_kw={"placeholder": "(optionnel) Prix minimum"}, 
-                             validators=[Optional()])
-    
-    price_max = DecimalField('Prix Max', 
-                             render_kw={"placeholder": "(optionnel) Prix maximum"}, 
-                             validators=[Optional()])
-
-    def set_choices(self, authors):
-        self.author.choices = [("", "Aucun")] + [(a.id, a.name) for a in authors]
-
-class LoginForm(FlaskForm):
-    """Formulaire de connexion
-    
-    Attributes:
-        username (StringField): Nom d'utilisateur
-        password (PasswordField): Mot de passe
-        next (HiddenField): Page de redirection après connexion
-    """
-    username = StringField('Username')
-    password = PasswordField('Password')
-    next = HiddenField('next')
-
-    def get_authenticated_user(self):
-        """Vérifie si l'utilisateur existe et si le mot de passe est correct
-
-        Returns:
-            User: Utilisateur connecté si les informations sont correctes, None sinon
-        """
-        user = User.query.get(self.username.data)
-        if user is None:
-            return None
-        m = sha256()
-        m.update(self.password.data.encode())
-        passwd = m.hexdigest()
-        return user if passwd == user.password else None
+from tuto.models import (
+    get_author, Book, Author, Favorite, Genres, get_paginate, remove_book, Note, avg_note
+)
+from tuto.app import app, db, mkpath
+from tuto.views.forms import BookForm, AuthorForm, LoginForm, AdvancedSearchForm
 
 @app.route("/")
 def home():
@@ -114,7 +27,13 @@ def books():
         les_livres_favoris = [fav.books for fav in les_favoris]
 
     pagination = get_paginate(num_page)
-    return render_template("home.html", title="", books=pagination.items, pagination=pagination, favorites=les_livres_favoris)
+    return render_template(
+        "home.html",
+        title="",
+        books=pagination.items,
+        pagination=pagination,
+        favorites=les_livres_favoris
+        )
 
 @app.route("/add/book")
 @login_required
@@ -142,14 +61,13 @@ def save_book():
             title=f.title.data,
             author_id= a.id)
         f.image.validators.pop()
-        
+
         for genre in f.genres.data:
             g = Genres.query.filter_by(name=genre).first()
             b.genres.append(g)
-    
+
         #add image to static folder
         try:
-
             db.session.add(b)
             db.session.commit()
 
@@ -212,13 +130,19 @@ def detail(id):
             db.session.delete(n)
             db.session.commit()
             note = avg_note(book.id)
-        
+
         note = avg_note(book.id)
-    
+
     note_donne = Note.query.filter_by(user_id=current_user.username, book_id=book.id).first()
     if note_donne:
         note_donne = note_donne.value
-    return render_template("books/detail.html", book=book, is_favorite=fav is not None, note=note, note_donne=note_donne)
+    return render_template(
+        "books/detail.html",
+        book=book,
+        is_favorite=fav is not None,
+        note=note,
+        note_donne=note_donne
+        )
 
 @app.route("/edit/book/<int:id>", methods=["GET", "POST"])
 @login_required
@@ -244,7 +168,7 @@ def edit_book(id):
         for genre in f.genres.data:
             g = Genres.query.filter_by(name=genre).first()
             b.genres.append(g)
-        
+
         # si il y une nouvelle image
         if f.image.data:
             b.image = f.image.data.filename
@@ -298,8 +222,8 @@ def edit_author(id):
     """
     a = get_author(id)
     f = AuthorForm(id=a.id, name=a.name)
-    lesLivres = Book.query.filter_by(author_id = a.id)
-    return render_template("authors/edit_author.html", author=a, form=f, books = lesLivres)
+    les_livres = Book.query.filter_by(author_id = a.id)
+    return render_template("authors/edit_author.html", author=a, form=f, books = les_livres)
 
 def delete_author():
     """
@@ -327,7 +251,8 @@ def save_author():
     Accessible en méthode POST.
     
     Si le formulaire est valide,
-        - si l'utilisateur a cliqué sur le bouton "Supprimer" : l'auteur est supprimé de la base de données
+        - si l'utilisateur a cliqué sur le bouton "Supprimer" : 
+                l'auteur est supprimé de la base de données
         - sinon, l'utilisateur a cliqué sur le bouton "Enregistrer" :
             - si l'auteur existe déjà, il est mis à jour dans la base de données    
             - sinon, un nouvel auteur est ajouté à la base de données
@@ -350,7 +275,7 @@ def save_author():
             db.session.add(a)
             db.session.commit()
             return redirect(url_for("authors"))
-    
+
     a = get_author(int(f.id.data))
     return render_template("authors/edit_author.html", author=a, form=f)
 
@@ -360,7 +285,8 @@ def login():
     Accessible en méthode GET et POST.
     En méthode GET, affiche le formulaire de connexion.
     En méthode POST, vérifie les informations de connexion
-        et redirige vers la page d'accueil ou vers la redirection, si les informations sont correctes.
+        et redirige vers la page d'accueil ou vers la redirection,
+        si les informations sont correctes.
     """
     f = LoginForm()
     if not f.is_submitted():
@@ -371,9 +297,10 @@ def login():
             login_user(user)
             next = f.next.data or url_for('home')
             return redirect(next)
-    return render_template("login.html", form=f) #appelé avec get (donc on rentre l'url /login/) => affiche le formulaire de login,
-                                                #si on soumet le formulaire (post), on vérifie les données, si elles sont correctes, 
-                                                # on redirige vers la page d'accueil (car le validate_on_submit() est vrai)
+    #appelé avec get (donc on rentre l'url /login/) => affiche le formulaire de login,
+    #si on soumet le formulaire (post), on vérifie les données, si elles sont correctes,
+    # on redirige vers la page d'accueil (car le validate_on_submit() est vrai)
+    return render_template("login.html", form=f)
 
 @app.route("/logout/")
 def logout():
@@ -450,5 +377,3 @@ def advanced_search():
             form = f
             )
     return render_template("books/advanced_search.html", form=f)
-
-#request.args.get('query')
