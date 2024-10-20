@@ -398,3 +398,17 @@ def add_genre():
         db.session.commit()
         return redirect(url_for("genres"))
     return render_template("genres/add_genre.html", form=f)
+
+@app.route("/genre/edit/<name>", methods=["GET", "POST"])
+def edit_genre(name):
+    """
+    route vers la fonctionnalité de modification d'un genre
+    """
+    genre = Genres.query.filter_by(name=name).first()
+    f = GenreForm(name=genre.name)
+    # si le formulaire est valide, on modifie le genre dans la base de données
+    if f.validate_on_submit():
+        genre.name = f.name.data
+        db.session.commit()
+        return redirect(url_for("genres"))
+    return render_template("genres/edit_genre.html", genre=genre, form=f)
