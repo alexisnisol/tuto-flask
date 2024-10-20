@@ -166,7 +166,8 @@ def edit_book(id):
         b.genres.clear()
         for genre in f.genres.data:
             g = Genres.query.filter_by(name=genre).first()
-            b.genres.append(g)
+            if g:
+                b.genres.append(g)
 
         # si il y une nouvelle image
         if f.image.data:
