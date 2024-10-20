@@ -75,6 +75,10 @@ def avg_note(book_id : int):
 def remove_book(id):
     b = Book.query.get(id)
 
+    #remove all notes for this book
+    for note in Note.query.filter_by(book_id=b.id).all():
+        db.session.delete(note)
+
     #remove all favorites for this book
     for fav in Favorite.query.filter_by(book_id=b.id).all():
         db.session.delete(fav)
