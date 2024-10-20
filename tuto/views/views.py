@@ -411,4 +411,5 @@ def edit_genre(name):
         genre.name = f.name.data
         db.session.commit()
         return redirect(url_for("genres"))
-    return render_template("genres/edit_genre.html", genre=genre, form=f)
+    les_livres = Book.query.filter(Book.genres.any(name=name)).all()
+    return render_template("genres/edit_genre.html", genre=genre, form=f, books=les_livres)
