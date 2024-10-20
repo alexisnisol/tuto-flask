@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% block styles %}
+{{ super() }}
+<link rel="stylesheet" href="{{ url_for('static', filename='home.css') }}">
+{% endblock %}
+
+{% block content %}
+<h1>{{title}}</h1>
+<div class="add_button text-center">
+    <a href="{{ url_for('add_genre') }}" class="btn btn-primary">Ajouter un genre</a>
+</div>
+<div class="sample">
+    {% for genre in genres %}
+    <a href="{{ url_for('edit_genre', name=genre.name)}}">
+        <h5>{{ genre.name }}</h5>
+    </a>
+    {% endfor %}
+</div>
+
+{% endblock %}

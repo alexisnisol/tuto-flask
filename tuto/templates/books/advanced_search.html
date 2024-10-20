@@ -55,6 +55,17 @@
         </ul>
     {% endif %}
 
+    <div class="form-group">
+        {{ form.genre.label }} {{ form.genre(class_="form-control") }}
+    </div>
+    {% if form.genre.errors %}
+        <ul class="list-group">
+            {% for e in form.genre.errors %}
+                <li class="list-group-item list-group-item-danger">{{ e }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+
     <input id="get_result_button" class="btn btn-primary" type="submit" value="Rechercher">
 </form>
 <div class="sample">
