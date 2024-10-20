@@ -172,7 +172,10 @@ def edit_book(id):
         # si il y une nouvelle image
         if f.image.data:
             b.image = f.image.data.filename
-
+            # Save the received frame as an image
+            image_data = f.image.data
+            with open(mkpath(f'static/images/{image_data.filename}'), 'wb') as file:
+                file.write(image_data.read())
         db.session.commit()
         return redirect(url_for("books"))
 
