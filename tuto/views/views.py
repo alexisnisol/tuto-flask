@@ -129,7 +129,6 @@ def detail(id):
             n = Note.query.filter_by(user_id=current_user.username, book_id=book.id).first()
             db.session.delete(n)
             db.session.commit()
-            note = avg_note(book.id)
 
         note = avg_note(book.id)
 
@@ -377,3 +376,24 @@ def advanced_search():
             form = f
             )
     return render_template("books/advanced_search.html", form=f)
+
+
+@app.route("/genres")
+def genres():
+    """
+    route vers la liste des genres
+    """
+    return render_template("genres/genres.html", genres=Genres.query.all())
+
+@app.route("/genre/add", methods=["GET", "POST"])
+def add_genre():
+    """
+    route vers la fonctionnalité d'ajout d'un genre
+    """
+    if request.method == "POST":
+        genre = request.form.get("genre")
+        if genre:
+            g = Genres(name=genre)
+            db.session.add(g)
+            db.session.commit()
+    return render_template("genres/add_genre.html")

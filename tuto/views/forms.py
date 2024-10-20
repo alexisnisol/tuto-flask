@@ -109,3 +109,8 @@ class LoginForm(FlaskForm):
         m.update(self.password.data.encode())
         passwd = m.hexdigest()
         return user if passwd == user.password else None
+
+class GenreForm(FlaskForm):
+    """Formulaire pour la gestion des genres
+    """
+    name = StringField('Nom', validators=[DataRequired()])
