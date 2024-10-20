@@ -3,7 +3,7 @@ from hashlib import sha256
 from flask_wtf import FlaskForm
 from flask_wtf.file import FileField, FileAllowed
 from wtforms import (
-    StringField, HiddenField, PasswordField, SelectField, DecimalField, SelectMultipleField
+    StringField, HiddenField, PasswordField, SelectField, DecimalField, SelectMultipleField, URLField
 )
 from wtforms.validators import DataRequired, Optional
 from tuto.models import Author, Genres, User, add_user
@@ -30,7 +30,7 @@ class BookForm(FlaskForm):
     genres = SelectMultipleField('Genre', validators=[Optional()])
     price = DecimalField('Prix', validators=[DataRequired()])
     author = SelectField('Auteur', choices=[], validators=[DataRequired()])
-    url = StringField('URL', validators=[DataRequired()])
+    url = URLField('URL', validators=[DataRequired()])
     image = FileField('image', validators=[
         FileAllowed(['jpg', 'png'], 'Images only!')
     ])
