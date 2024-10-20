@@ -301,6 +301,25 @@ def login():
     # on redirige vers la page d'accueil (car le validate_on_submit() est vrai)
     return render_template("login.html", form=f)
 
+@app.route("/register/", methods=["GET", "POST"])
+def register():
+    """Route vers la page d'inscription.
+    Accessible en méthode GET et POST.
+    En méthode GET, affiche le formulaire d'inscription.
+    En méthode POST, vérifie les informations d'inscription
+        et redirige vers la page d'accueil, si les informations sont correctes.
+    """
+    f = LoginForm()
+    error_msg = None
+    if f.validate_on_submit():
+        user = f.create_user()
+        if user:
+            login_user(user)
+            return redirect(url_for('home'))
+        else:
+            error_msg = "Utilisateur déjà existant"
+    return render_template("register.html", form=f, error_msg=error_msg)
+
 @app.route("/logout/")
 def logout():
     """Route vers la déconnexion.
