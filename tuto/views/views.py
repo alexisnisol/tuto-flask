@@ -6,7 +6,7 @@ from tuto.models import (
     get_author, Book, Author, Favorite, Genres, get_paginate, remove_book, Note, avg_note
 )
 from tuto.app import app, db, mkpath
-from tuto.views.forms import BookForm, AuthorForm, LoginForm, AdvancedSearchForm
+from tuto.views.forms import BookForm, AuthorForm, LoginForm, AdvancedSearchForm, GenreForm
 
 @app.route("/")
 def home():
@@ -390,10 +390,11 @@ def add_genre():
     """
     route vers la fonctionnalité d'ajout d'un genre
     """
-    if request.method == "POST":
-        genre = request.form.get("genre")
-        if genre:
-            g = Genres(name=genre)
-            db.session.add(g)
-            db.session.commit()
-    return render_template("genres/add_genre.html")
+    f = GenreForm()
+    # si le formulaire est valide, on ajoute le genre à la base de données
+    if f.validate_on_submit():
+        genre = Genres(name=f.name.data)
+        db.session.add(genre)
+        db.session.commit()
+        return redirect(url_for("genres"))
+    return render_template("genres/add_genre.html", form=f)
