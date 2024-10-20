@@ -6,7 +6,7 @@ from wtforms import (
     StringField, HiddenField, PasswordField, SelectField, DecimalField, SelectMultipleField
 )
 from wtforms.validators import DataRequired, Optional
-from tuto.models import Author, Genres, User
+from tuto.models import Author, Genres, User, add_user
 
 class AuthorForm(FlaskForm):
     """Formulaire pour la gestion des auteurs
@@ -92,8 +92,8 @@ class LoginForm(FlaskForm):
         password (PasswordField): Mot de passe
         next (HiddenField): Page de redirection après connexion
     """
-    username = StringField('Username')
-    password = PasswordField('Password')
+    username = StringField('Username', validators=[DataRequired()])
+    password = PasswordField('Password', validators=[DataRequired()])
     next = HiddenField('next')
 
     def get_authenticated_user(self):
@@ -109,3 +109,17 @@ class LoginForm(FlaskForm):
         m.update(self.password.data.encode())
         passwd = m.hexdigest()
         return user if passwd == user.password else None
+    
+    def create_user(self):
+        """Crée un utilisateur dans la base de données à partir des informations du formulaire,
+        si l'utilisateur n'existe pas déjà
+
+        Returns:
+            Boolean: True si l'utilisateur a été créé, False sinon
+        """
+        user = User.query.get(self.username.data)
+        if user is None:
+            m = sha256()
+            m.update(self.password.data.encode())
+            return add_user(self.username.data, m.hexdigest())
+        return None

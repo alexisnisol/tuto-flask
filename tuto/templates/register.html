@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block styles %}
+{{ super() }}
+<link rel="stylesheet" href="{{ url_for('static', filename='home.css')}}"> 
+{% endblock %}
+
+{% block content %}
+<div class="mx-auto col-lg-4">
+    <h2>Inscription</h2>
+    <form class="form-horizontal" method="POST" action="{{ url_for('register') }}">
+        
+        {{ form.hidden_tag() }}
+
+        <div class=
+            {% if error_msg %}
+                "form-floating mt-3 has-error"
+            {% else %}
+                "form-floating mt-3"
+            {% endif %}
+            >
+            {{ form.username(class="form-control") }}
+            <label for="floatingInput">Username</label>
+        </div>
+        {% if error_msg %}
+        <ul class="list-group">
+            <li class="list-group-item list-group-item-danger">{{ error_msg }}</li>
+        </ul>
+        {% endif %}
+
+        <div class="form-floating my-3">
+            {{ form.password(class="form-control", type="password") }}
+            <label for="floatingPassword">Password</label>
+        </div>
+
+        <button class="w-100 btn btn-lg btn-primary" type="submit">S'inscrire</button>
+        <hr>
+        <small class="text-muted">
+            Vous avez déjà un compte ? <a href="{{ url_for('login') }}" class="text-right">Se connecter</a>
+        </small>
+    </form>
+</div>
+{% endblock %}

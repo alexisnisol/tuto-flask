@@ -100,6 +100,12 @@ class User(db.Model, UserMixin):
     def get_id(self):
         return self.username
     
+def add_user(username, password):
+    u = User(username=username, password=password)
+    db.session.add(u)
+    db.session.commit()
+    return u
+    
 @login_manager.user_loader
 def load_user(username):
     return User.query.get(username)
