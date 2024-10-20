@@ -77,7 +77,7 @@ flask run
 | Affichage des livres et les détails | TP initial |
 | Intégration Bootstrap | TP initial |
 | Commande d'import de données (loaddb) | TP initial |
-| Commande de création des tables (syndb) | TP initial |
+| Commande de création des tables (syncdb) | TP initial |
 | Ajout / Suppression d'un livre | Alexis |
 | Édition d'un livre | Enzo |
 | Ajout / Suppression / Édition d'un auteur | Alexis |
