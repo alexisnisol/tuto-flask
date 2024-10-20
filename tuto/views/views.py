@@ -341,13 +341,14 @@ def advanced_search():
     route vers la fonctionnalité de recherche avancée
     """
     f = AdvancedSearchForm()
-    f.set_choices(Author.query.all())
+    f.set_choices()
     if f.validate_on_submit():
         # récupération des données
         title = f.title.data
         author = f.author.data
         price_min = f.price_min.data
         price_max = f.price_max.data
+        genre = f.genre.data
         # les livres filtrés
         les_livres = Book.query
         if title:
@@ -358,6 +359,8 @@ def advanced_search():
             les_livres = les_livres.filter(Book.price >= price_min)
         if price_max:
             les_livres = les_livres.filter(Book.price <= price_max)
+        if genre:
+            les_livres = les_livres.filter(Book.genres.any(name=genre))
         les_livres = les_livres.all()
         # les livres favoris
         les_livres_favoris = []

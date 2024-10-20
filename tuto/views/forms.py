@@ -27,7 +27,7 @@ class BookForm(FlaskForm):
     """
     id = HiddenField('id')
     title = StringField('Titre', validators=[DataRequired()])
-    genres = SelectMultipleField('Genre', validators=[DataRequired()])
+    genres = SelectMultipleField('Genre', validators=[Optional()])
     price = DecimalField('Prix', validators=[DataRequired()])
     author = SelectField('Auteur', choices=[], validators=[DataRequired()])
     url = StringField('URL', validators=[DataRequired()])
@@ -46,7 +46,7 @@ class BookForm(FlaskForm):
         Args:
             genres (list): Liste des genres disponibles
         """
-        self.genres.choices = [(g.name, g.name) for g in genres]
+        self.genres.choices = [("", "Aucun")] + [(g.name, g.name) for g in genres]
 
     def set_choices(self, authors):
         """Définit les auteurs disponibles dans le formulaire
@@ -76,13 +76,19 @@ class AdvancedSearchForm(FlaskForm):
                              render_kw={"placeholder": "(optionnel) Prix maximum"},
                              validators=[Optional()])
 
-    def set_choices(self, authors):
+    genre = SelectField('Genre',
+                        choices=[],
+                        default=None,
+                        validators=[Optional()])
+
+    def set_choices(self):
         """Définit les auteurs disponibles dans le formulaire
 
         Args:
             authors (list): Liste des auteurs disponibles
         """
-        self.author.choices = [("", "Aucun")] + [(a.id, a.name) for a in authors]
+        self.author.choices = [("", "Aucun")] + [(a.id, a.name) for a in Author.query.all()]
+        self.genre.choices = [("", "Aucun")] + [(g.name, g.name) for g in Genres.query.all()]
 
 class LoginForm(FlaskForm):
     """Formulaire de connexion
