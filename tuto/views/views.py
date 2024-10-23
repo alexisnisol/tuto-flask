@@ -237,9 +237,11 @@ def delete_author():
     f = AuthorForm()
     if f.validate_on_submit():
         a = get_author(int(f.id.data))
-
+        
+        
         for b in a.books:
-            db.session.delete(b)
+            remove_book(b.id)
+            #db.session.delete(b)
 
         db.session.delete(a)
         db.session.commit()
